@@ -6,7 +6,7 @@
         <array>
             <dict>
                 <key>Image File</key>
-                <string>Leengoo.png</string>
+                <string>Leengoo.ico</string>
                 <key>Script Interpreter</key>
                 <string>/usr/bin/php</string>
                 <key>Shell Script File</key>
