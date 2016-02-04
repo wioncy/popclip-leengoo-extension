@@ -16,35 +16,34 @@ class Leengoo
 
     /** Curl object */
     protected $ch;
-	
+
     public function __construct($user, $pass)
     {
         date_default_timezone_set(self::DEFAULT_TIME_ZONE);
         $this->ch = curl_init();
-		
-		//If cookies exists we are done. If not, let's login.
-        if (file_exists(self::COOKIES_FILE_NAME))
-        {
+
+        //If cookies exists we are done. If not, let's login.
+        if (file_exists(self::COOKIES_FILE_NAME)) {
             $fileCreationDate = date('Y-m-d', filectime(self::COOKIES_FILE_NAME));
             $fileDate = new DateTime($fileCreationDate);
-            if ( !(new DateTime)->diff($fileDate)->format('%m') )
+            if (!(new DateTime)->diff($fileDate)->format('%m'))
                 return;
         }
         $this->authenticateUser($user, $pass);
     }
 
-	/**
-	* Manually deletes curl object from memory
-	*/
+    /**
+     * Manually deletes curl object from memory
+     */
     public function __destruct()
     {
-       curl_close($this->ch);
+        curl_close($this->ch);
     }
 
     /**
      * Returns translated word
      * @param $word
-     * @return mixed
+     * @return array
      */
     public function getTranslation($word)
     {
@@ -61,8 +60,9 @@ class Leengoo
 
     /**
      * Here we are adding our new word into dictionary
-	 * @param string $wordId
-	 * @param string $translationId
+     * @param string $wordId
+     * @param string $translationId
+     * @return array
      */
     public function addToDictionary($wordId, $translationId)
     {
@@ -80,11 +80,13 @@ class Leengoo
 
     /**
      * User authorization
+     * @param $user
+     * @param $pass
+     * @return void
      */
     protected function authenticateUser($user, $pass)
     {
-        if ($user && $pass)
-        {
+        if ($user && $pass) {
             $postParams = http_build_query([
                 '_method' => 'POST',
                 'data[User][email]' => $user,
@@ -120,7 +122,7 @@ class Leengoo
      */
     protected function executeRequest(array $additionalOptions)
     {
-        $cookiesPath = __DIR__ .  DIRECTORY_SEPARATOR . self::COOKIES_FILE_NAME;
+        $cookiesPath = __DIR__ . DIRECTORY_SEPARATOR . self::COOKIES_FILE_NAME;
 
         $options = array_replace([
             CURLOPT_RETURNTRANSFER => true,
@@ -141,24 +143,21 @@ $client = new Leengoo($user, $pass);
 
 $translationData = $client->getTranslation($word);
 
-if ($translationData)
-{
-	$translationId = key($translationData['tls']);
-	$translatedWord = current($translationData['tls']);
-	$wordId = $translationData['id']['w'];
-	$userWordId = $translationData['id']['uw'];
+if ($translationData) {
+    $translationId = key($translationData['tls']);
+    $translatedWord = current($translationData['tls']);
+    $wordId = $translationData['id']['w'];
+    $userWordId = $translationData['id']['uw'];
 
-	//If not correct word we are going return 0
-	if ($translatedWord == $word)
-	{
-		return;
-	}
-	
-	//If it is new word for us, let it be recorded in our dictionary
-	if (!$userWordId)
-	{
-	    $client->addToDictionary($wordId, $translationId);
-	}	
-	
-	echo $translatedWord;
+    //If not correct word we are going return 0
+    if ($translatedWord == $word) {
+        return;
+    }
+
+    //If it is new word for us, let it be recorded in our dictionary
+    if (!$userWordId) {
+        $client->addToDictionary($wordId, $translationId);
+    }
+
+    echo $translatedWord;
 }
